@@ -85,9 +85,6 @@ class RestClient:
             params = dict(q=json.dumps(
                           dict(filters=filters)))
 
-
-        print(params)
-
         # get first page
         r = requests.get(url, params=params)
         if r.status_code != 200:
