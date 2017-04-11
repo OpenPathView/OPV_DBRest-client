@@ -1,8 +1,8 @@
-from opv_api_client.helpers import PropertyAsDict
+from opv_api_client.helpers import PropertyAsDict, MetaRessource
 
 __all__ = ['Ressource']
 
-class Ressource(PropertyAsDict):
+class Ressource(PropertyAsDict, metaclass=MetaRessource):
     api_version = None
     name = None
     primary_keys = tuple()
@@ -35,3 +35,8 @@ class Ressource(PropertyAsDict):
     def create(self):
         """Allow to create the ressource on the server"""
         return self.rest_client.create(self)
+
+    @classmethod
+    def where(cls, client, query):
+        """Allow to get all instances of ressource that satisfy query (same format as RestClient.make_all)"""
+        return client.make_all(cls.name, query)

@@ -5,6 +5,7 @@ import requests
 import json
 
 from opv_api_client.ressources import ressources
+from opv_api_client.filter import treat_query
 
 class RestClient:
     """A client that allow to connect to the rest API"""
@@ -75,13 +76,17 @@ class RestClient:
         """
         ressource_class = ressources[ressource_name]
         url = self._makeUrl(ressource_class.api_version,
-                            ressource_class.name.value)
+                ressource_class.name.value)
 
         # Create params
+        filters = treat_query(filters)
         params = dict()
         if filters:
             params = dict(q=json.dumps(
                           dict(filters=filters)))
+
+
+        print(params)
 
         # get first page
         r = requests.get(url, params=params)
@@ -99,12 +104,11 @@ class RestClient:
         for x in range(1, page_number + 1):  # for page in all_pages
             for data in page["objects"]:  # for ressource in page
                 ress = self.make(ressource_name)
-                ress.update(data)
+                ress.data = data
 
                 list_ress.append(ress)
 
             params["page"] = page_number
-            print(params)
             page = requests.get(url, params=params)
 
         return list_ress

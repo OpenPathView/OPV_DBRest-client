@@ -1,37 +1,33 @@
+from opv_api_client.filter import Filter
 
-class PropertyAsDict():
-    """The internal dict self.data can be accessed as if it were a normal propoerty
-    e.g:
-    >>> p = PropertyAsDict()
-    >>> p.data["truc"] = "bidule"
-    >>> self.truc
-    bidule
-    >>> p.truc = "machin"
-    >>> p.data['truc']
-    machin
+class MetaPropertyAsDict(type):
+    def __call__(*args, **kwargs):  # called when you do a ClassName()
+        obj = type.__call__(*args, **kwargs)
+        obj._init = True
+        return obj
 
-    Also provides alias via alias attribute
-    e.g
-    >>> p.alias = {"machin": "truc"}
-    >>> p.truc is p.machin
-    True
+class MetaRessource(MetaPropertyAsDict):
+    def __getattr__(cls, name):
+        """Getters used when the class isn't instancied
+        Allow to make filtering easy
+        e.g ressources.Lot.id_malette == 1 same as Filter("id_malette").op("eq").value(1)
+        """
+        return Filter(name)
+
+class PropertyAsDict(metaclass=MetaPropertyAsDict):
+    """
+    A class that
+    Thanks to the Metaclass, when __init__ is ended, you can't create new varible, except thanks to __normal_setattr
     """
     alias = {}
+
     def __init__(self, data=None):
-        # after this, can't create new attribute in self -> will be create in self.data
-        # can be bypassed, using __normal_setattr(item_name, new_value) / __normal_getattr(item_name)
         if data:
             self.data = data
         else:
             self.data = {}
 
-        self._init = True
-
-    # Adapted from http://code.activestate.com/recipes/389916-example-setattr-getattr-overloading/
     def __getattr__(self, item):
-        """Maps values to attributes.
-        Only called if there *isn't* an attribute with this name
-        """
         try:
             return self.data[item]
         except KeyError:
@@ -44,15 +40,17 @@ class PropertyAsDict():
         return self.__getattribute__(item)  # use normal way finally
 
     def __setattr__(self, item, value):
-        """Maps attributes to values.
-        Only if we are initialised
-        """
-        # allow to init some interns values in __init__
+        """Set to value self.item if it exists, otherwise, self.data[item].
+        If self._init = False, then set to value self.item in any case"""
+
+        # _init is set, set self.item to value
         if "_init" not in self.__dict__:
             super().__setattr__(item, value)
 
-        # any normal attributes are handled normally
-        elif item in self.__class__.__dir__(self):  # list all attribute, including class attribute (works better than __dict)
+        # set self.item to value
+        # self.__class__.__dir__ list all statics attributes
+        # self.__dict__ list all instances attributes
+        elif item in self.__class__.__dir__(self) + list(self.__dict__.values()):
             super().__setattr__(item, value)
 
         # search now in self.data
