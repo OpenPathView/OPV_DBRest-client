@@ -11,14 +11,27 @@ class Ressource(PropertyAsDict, metaclass=MetaRessource):
         """Warning, __init__ should be called at the very end of child's init - Won't works otherwise"""
         self.rest_client = rest_client
 
-        data = {primary_key: id for primary_key, id in zip(self.primary_keys, ids)}
+        if ids:
+            data = {primary_key: id for primary_key, id in zip(self.primary_keys, ids)}
+        else:
+            data = {}
 
         # Create new attribute before this
         super().__init__(data)
 
     @property
     def id(self):
-        return tuple(self.data[primary_key] for primary_key in self.primary_keys)
+        """:obj: tuple or :obj: None: return the id of the ressource, if any"""
+        try:
+            return tuple(self.data[primary_key] for primary_key in self.primary_keys)
+        except KeyError:  # Don't have a full ID, probably not created
+            return None
+
+    def __eq__(left, right):
+        return left.data == right.data
+
+    def __str__(self):
+        return str(self.data)
 
     def save(self):
         """Allow to save locals changes to the server"""
