@@ -1,7 +1,7 @@
 from opv_api_client.ressource import Ressource
 from opv_api_client.ressource_list import RessourceEnum
 
-class Sensors(Ressource):
+class Tile(Ressource):
     api_version = "v1"
-    name = RessourceEnum.sensors
-    primary_keys = ("id_sensors", "id_malette")
+    name = RessourceEnum.tile
+    primary_keys = ("id_tile", "id_malette")

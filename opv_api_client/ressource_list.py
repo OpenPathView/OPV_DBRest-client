@@ -5,5 +5,5 @@ class RessourceEnum(Enum):
     campaign = "campaign"
     tile = "tile"
     panorama = "panorama"
-    # Etc. TODO
-
+    cp = "cp"
+    sensors = "sensors"
