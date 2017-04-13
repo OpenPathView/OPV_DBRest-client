@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/OpenPathView/OPV_DBRest-client.svg?branch=master)](https://travis-ci.org/OpenPathView/OPV_DBRest-client)
-
+[![codecov](https://codecov.io/gh/OpenPathView/OPV_DBRest-client/branch/master/graph/badge.svg)](https://codecov.io/gh/OpenPathView/OPV_DBRest-client)
 ## How to use
 ```python
 from  opv_api_client import RestClient, Filter, RessourceEnum
