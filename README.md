@@ -1,18 +1,15 @@
 ## How to use
 ```python
-import opv_client_api
+from  opv_api_client import RestClient, Filter, RessourceEnum
 
 # create the client with API at localhost:5000
-c = opv_api_client.RestClient("http://127.0.0.1:5000")
+c = RestClient("http://127.0.0.1:5000")
 
 # get the lot with id_lot = 2,  id_malette = 1
-lot = c.make(opv_api_client.RessourceEnum.lot, 2, 1)
+lot = c.make(RessourceEnum.lot, 2, 1)
 
 # get taken_lot
 lot.taken_date
-
-# or get taken_lot (1st way is better) -- May be remove soon, don't use it (except for debug - maybe)
-lot['taken_date']
 
 # set goprofailed
 lot.goprofailed = 11100
@@ -21,7 +18,7 @@ lot.goprofailed = 11100
 lot.save()
 
 # create a new campaign
-campaign = c.make(opv_api_client.RessourceEnum.campaign)
+campaign = c.make(RessourceEnum.campaign)
 
 # set id_malette
 campaign.id_malette = 1
@@ -32,15 +29,12 @@ campaign.create()
 # delete it 
 campaign.delete()
 
-# get all lot of campaign with id_campaign == 1 -> cf http://flask-restless.readthedocs.io/en/stable/searchformat.html
-#                                                  To get the format for filters
-lots = c.make_all(opv_api_client.RessourceEnum.lot, filters=[{"name":"id_campaign", "op":"eq", "val":"1"}])
+# get all lot of campaign with id_campaign == 1 
+lots = c.make_all(RessourceEnum.lot, filters=(Filter("id_campaign") == 1))
+
+# get all lot of campaign with id_campaign == 1 and id_malette == 2
+lots = c.make_all(RessourceEnum.lot, filters=(Filter("id_campaign") == 1, Filter("id_malette") == 2))
 ```
-
-TODO: create helpers fcts for filters
-
-delete, create, save... return the response of resquests
-
 ## How to maintain
 ### Add a ressource
 e.g with campaign
@@ -52,6 +46,7 @@ from opv_api_client.ressource_list import RessourceEnum
 class Campaign(Ressource):
     api_version = "v1"
     name = RessourceEnum.campaign
+    primary_keys = ('id_campaign', 'id_malette')
 ```
 in ressource_list.py in RessourceEnum add: `campaign = "campaign"`
 
@@ -74,5 +69,6 @@ in ressources/campaign.py
 class Campaign(Ressource):
     api_version = "v1"
     name = RessourceEnum.campaign
+    primary_keys = ('id_campaign', 'id_malette')
     alias = {"test": "decription"}
 ```
