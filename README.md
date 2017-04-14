@@ -1,3 +1,5 @@
+# Quickstart
+
 [![Build Status](https://travis-ci.org/OpenPathView/OPV_DBRest-client.svg?branch=master)](https://travis-ci.org/OpenPathView/OPV_DBRest-client)
 [![codecov](https://codecov.io/gh/OpenPathView/OPV_DBRest-client/branch/master/graph/badge.svg)](https://codecov.io/gh/OpenPathView/OPV_DBRest-client)
 ## How to use
@@ -36,6 +38,9 @@ lots = c.make_all(RessourceEnum.lot, filters=(Filter("id_campaign") == 1))
 
 # get all lot of campaign with id_campaign == 1 and id_malette == 2
 lots = c.make_all(RessourceEnum.lot, filters=(Filter("id_campaign") == 1, Filter("id_malette") == 2))
+
+# will raises opv_api_client.RequestAPIError if can't get data from the server (e.g id not found)
+c.make(RessourceEnum.lot, 1, 54545) # id_malette == 54545 don't exist
 ```
 ## How to maintain
 ### Add a ressource

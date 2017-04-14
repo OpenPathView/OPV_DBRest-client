@@ -4,8 +4,10 @@
 import requests
 import json
 
+
 from inspect import isclass
 
+from opv_api_client.exceptions import RequestAPIException
 from opv_api_client.ressource import Ressource
 from opv_api_client.ressources import ressources
 from opv_api_client.filter import treat_query
@@ -118,13 +120,19 @@ class RestClient:
 
         Args:
             ressource(Ressource): the ressource to get
+        Returns:
+            requests.Response: The response of the request
+        Raises
+            RequestAPIException: if the ressource can't be fetched
         """
         url = self._makeUrlFromRessource(ressource)
         r = requests.get(url)
 
         if r.status_code == 200:
             ressource.data.update(r.json())
-        return r
+            return r
+        else:
+            raise RequestAPIException("Can't get the ressource on the API", response=r)
 
     def _gen_id(self, id, id_malette):
         """An helper that generate an id from a composite id
@@ -184,7 +192,7 @@ class RestClient:
             ressource_class = ressources[ressource]
 
         # The url of the ressource
-        url = self._makeUrlFromRessource(ressource)
+        url = self._makeUrlFromRessource(ressource_class)
 
         # Create params that will be send
         if filters:
@@ -196,7 +204,7 @@ class RestClient:
         # get first page - Allow to know the number of pages, etc
         r = requests.get(url, params=params)
         if r.status_code != 200:
-            return []
+            raise RequestAPIException("Can't get the list of ressources", response=r)
         j = r.json()
 
         # get nbr of page
