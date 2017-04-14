@@ -63,7 +63,8 @@ def test_create():
     ress = ressources.Lot(c)
 
     with mock.patch('opv_api_client.restclient.requests.post') as mocked_post:
-        c.create(ress)
+        with mock.patch('opv_api_client.restclient.RestClient.get'):
+            c.create(ress)
     mocked_post.assert_called_once_with(c._makeUrlFromRessource(ress), json=ress._data)
 
 def test_remove():

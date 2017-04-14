@@ -98,7 +98,11 @@ class RestClient:
             ressource(Ressource): the ressource to create
         """
         url = self._makeUrlFromRessource(ressource)
-        return requests.post(url, json=ressource._data)
+        r = requests.post(url, json=ressource._data)
+
+        ressource.get()
+
+        return r
 
     def remove(self, ressource):
         """Remove the ressource - Do not use directly

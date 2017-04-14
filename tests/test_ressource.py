@@ -17,4 +17,5 @@ def test_create():
     ress = ressources.Campaign(c)
 
     with mock.patch('opv_api_client.restclient.requests.post'):
-        ress.create()
+        with mock.patch('opv_api_client.restclient.RestClient.get'):
+            ress.create()
