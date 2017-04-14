@@ -161,6 +161,8 @@ class RestClient:
 
         Returns:
             Ressource: The new instanciated ressource
+        Raises:
+            RequestAPIException if the ressource can't be find on the API (only if id_malette and id_ress are set)
         """
         # get the class of the ressource to make
         if isclass(ressource) and issubclass(ressource, Ressource):
@@ -184,6 +186,8 @@ class RestClient:
             filters(:obj: Filter or :obj: dict or :obj: list, optional): Any kind of filter accepted by filter.treat_query
         Returns:
             list: The list of all the ressource that satisfy filters
+        Raises:
+            RequestAPIException if the API page where the list of ressource can't be reached
         """
         # get the class of the ressource to make
         if isclass(ressource) and issubclass(ressource, Ressource):
