@@ -46,8 +46,8 @@ class RestClient:
             iter(id)
         except TypeError:
             id = None
-        return self._makeUrl(ressource.api_version,
-                             ressource.name.value,
+        return self._makeUrl(ressource._api_version,
+                             ressource._name.value,
                              id)
 
     def _makeUrl(self, api_version, api_ressource, api_ressource_id=None):
@@ -86,7 +86,7 @@ class RestClient:
             ressource(Ressource): the ressource to remove
         """
         url = self._makeUrlFromRessource(ressource)
-        return requests.patch(url, json=ressource.data)
+        return requests.patch(url, json=ressource._data)
 
     def create(self, ressource):
         """Create the ressource - Do not use directly
@@ -98,7 +98,7 @@ class RestClient:
             ressource(Ressource): the ressource to create
         """
         url = self._makeUrlFromRessource(ressource)
-        return requests.post(url, json=ressource.data)
+        return requests.post(url, json=ressource._data)
 
     def remove(self, ressource):
         """Remove the ressource - Do not use directly
@@ -129,7 +129,7 @@ class RestClient:
         r = requests.get(url)
 
         if r.status_code == 200:
-            ressource.data.update(r.json())
+            ressource._data.update(r.json())
             return r
         else:
             raise RequestAPIException("Can't get the ressource on the API", response=r)
@@ -221,7 +221,7 @@ class RestClient:
         for x in range(1, page_number + 1):  # for page in all_pages
             for data in page["objects"]:  # for ressource in page
                 ress = self.make(ressource_class)
-                ress.data = data
+                ress._data = data
 
                 list_ress.append(ress)
 

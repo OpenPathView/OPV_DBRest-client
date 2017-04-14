@@ -19,21 +19,21 @@ class PropertyAsDict(metaclass=MetaPropertyAsDict):
     A class that
     Thanks to the Metaclass, when __init__ is ended, you can't create new varible, except thanks to __normal_setattr
     """
-    alias = {}
+    _alias = {}
 
     def __init__(self, data=None):
         if data:
-            self.data = data
+            self._data = data
         else:
-            self.data = {}
+            self._data = {}
 
     def __getattr__(self, item):
         try:
-            return self.data[item]
+            return self._data[item]
         except KeyError:
             pass
         try:  # to find the item in alias
-            return self.data[self.alias[item]]
+            return self._data[self._alias[item]]
         except KeyError:
             pass
 
@@ -55,8 +55,8 @@ class PropertyAsDict(metaclass=MetaPropertyAsDict):
 
         # search now in self.data
         else:
-            item = self.alias.get(item, item)  # if is an alias, get the real name
-            self.data[item] = value
+            item = self._alias.get(item, item)  # if is an alias, get the real name
+            self._data[item] = value
 
     def __normal_getattr(self, item):
         super().__getattribute__(item)

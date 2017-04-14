@@ -20,6 +20,11 @@ def test_make_url():
     assert c._makeUrl("v1", "test_res") == "localhost:5000/test/test_res/v1"
     assert c._makeUrl("v1", "test_res", (2, 1)) == "localhost:5000/test/test_res/v1/id:2-1"
 
+def test_makeUrlFromRessource():
+    c = restclient.RestClient("localhost:5000")
+    ress = ressources.Lot(c)
+    assert c._makeUrlFromRessource(ress) == "localhost:5000/api/v1/lot"
+
 def test_make_success():
     c = restclient.RestClient("")
 
@@ -51,7 +56,7 @@ def test_save():
 
     with mock.patch('opv_api_client.restclient.requests.patch') as mocked_patch:
         c.save(ress)
-    mocked_patch.assert_called_once_with(c._makeUrlFromRessource(ress), json=ress.data)
+    mocked_patch.assert_called_once_with(c._makeUrlFromRessource(ress), json=ress._data)
 
 def test_create():
     c = restclient.RestClient("")
@@ -59,7 +64,7 @@ def test_create():
 
     with mock.patch('opv_api_client.restclient.requests.post') as mocked_post:
         c.create(ress)
-    mocked_post.assert_called_once_with(c._makeUrlFromRessource(ress), json=ress.data)
+    mocked_post.assert_called_once_with(c._makeUrlFromRessource(ress), json=ress._data)
 
 def test_remove():
     c = restclient.RestClient("")
@@ -77,7 +82,7 @@ def test_get_success():
     with mock.patch('opv_api_client.restclient.requests.get', return_value=r):
         assert r is c.get(ress)
 
-    assert ress.data == {"a": 1, 'id_lot': 2, 'id_malette': 1}
+    assert ress._data == {"a": 1, 'id_lot': 2, 'id_malette': 1}
 
 def test_get_fail():
     c = restclient.RestClient("")
@@ -104,13 +109,13 @@ def test_make_all():
     fparams = dict(q=json.dumps(dict(filters=filters)))
 
     waited1 = [ressources.Lot(c) for _ in range(3)]
-    waited1[0].data = {"machin": "truc"}
-    waited1[1].data = {"machin": "bidule"}
-    waited1[2].data = {"machin": "truc"}
+    waited1[0]._data = {"machin": "truc"}
+    waited1[1]._data = {"machin": "bidule"}
+    waited1[2]._data = {"machin": "truc"}
 
     waited2 = [ressources.Lot(c) for _ in range(2)]
-    waited2[0].data = {"machin": "truc"}
-    waited2[1].data = {"machin": "truc"}
+    waited2[0]._data = {"machin": "truc"}
+    waited2[1]._data = {"machin": "truc"}
 
     def get(url, params):
         if params == fparams:  # has filter
