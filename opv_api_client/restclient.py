@@ -96,7 +96,7 @@ class RestClient:
         Returns:
             dict: A dictionnary without any None keys
         """
-        return {k: v for k, v in dictionnary.items() if v}
+        return {k: v for k, v in dictionnary.items() if v is not None}
 
     def create(self, ressource):
         """Create the ressource - Do not use directly
