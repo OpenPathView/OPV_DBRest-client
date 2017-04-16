@@ -86,7 +86,17 @@ class RestClient:
             ressource(Ressource): the ressource to remove
         """
         url = self._makeUrlFromRessource(ressource)
-        return requests.patch(url, json=ressource._data)
+        j = self.__remove_empty_keys__(ressource._data)
+        return requests.patch(url, json=j)
+
+    def __remove_empty_keys__(self, dictionnary):
+        """Take a dict and remove all None Keys
+        Args:
+            dictionnary(dict): the dict where you want to remove all None entries
+        Returns:
+            dict: A dictionnary without any None keys
+        """
+        return {k: v for k, v in dictionnary.items() if v}
 
     def create(self, ressource):
         """Create the ressource - Do not use directly
@@ -98,7 +108,8 @@ class RestClient:
             ressource(Ressource): the ressource to create
         """
         url = self._makeUrlFromRessource(ressource)
-        r = requests.post(url, json=ressource._data)
+        j = self.__remove_empty_keys__(ressource._data)
+        r = requests.post(url, json=j)
         if r.status_code != 201:
             raise RequestAPIException("Can't create ressource", response=r)
 
