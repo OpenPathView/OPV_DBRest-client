@@ -99,8 +99,10 @@ class RestClient:
         """
         url = self._makeUrlFromRessource(ressource)
         r = requests.post(url, json=ressource._data)
+        if r.status_code != 201:
+            raise RequestAPIException("Can't create ressource", response=r)
 
-        ressource.get()
+        ressource._data.update(r.json())
 
         return r
 
