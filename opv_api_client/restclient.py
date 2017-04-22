@@ -41,6 +41,8 @@ class RestClient:
             str: The final URL, that can be directly used.
         """
         id = ressource.id
+        if not isinstance(id, dict):
+            id = None
         return self._makeUrl(ressource._api_version,
                              ressource._name,
                              id)
@@ -218,27 +220,15 @@ class RestClient:
         else:
             params = dict()
 
-        # get first page - Allow to know the number of pages, etc
         r = requests.get(url, params=params)
         if r.status_code != 200:
             raise RequestAPIException("Can't get the list of ressources", response=r)
-        j = r.json()
-
-        # get nbr of page
-        page_number = j.get("total_pages", 1)
-        page = j
+        page = r.json()
 
         list_ress = []
+        for data in page["objects"]:  # for ressource in page
+            ress = self.make(ressource_class)
+            ress.load_data(data)
 
-        # Get the list of ressource
-        for x in range(1, page_number + 1):  # for page in all_pages
-            for data in page["objects"]:  # for ressource in page
-                ress = self.make(ressource_class)
-                ress.load_data(data)
-
-                list_ress.append(ress)
-
-            params["page"] = page_number
-            page = requests.get(url, params=params).json()
-
+            list_ress.append(ress)
         return list_ress

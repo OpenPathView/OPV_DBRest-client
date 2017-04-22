@@ -92,16 +92,18 @@ def test_get_fail():
         with pytest.raises(RequestAPIException):
             c.get(ress)
 
-@pytest.mark.xfail(strict=True)
 def test_make_all():
     c = restclient.RestClient("")
 
-    responses1 = [  # no filter
-        {"total_pages": 2, "objects": [{"machin": "truc"}, {"machin": "bidule"}]},
-        {"total_pages": 2, "objects": [{"machin": "truc"}]}]
+    responses1 = {  # no filter
+        "objects":
+        [{"machin": "truc"}, {"machin": "bidule"}, {"machin": "chouette"}]
+    }
 
-    responses2 = [  # filter
-        {"total_pages": 1, "objects": [{"machin": "truc"}, {"machin": "truc"}]}]
+    responses2 = {  # filter
+        "objects":
+        [{"machin": "truc"}, {"machin": "truc"}]
+    }
 
     filters = treat_query(Filter("machin") == "truc")
     fparams = dict(q=json.dumps(dict(filters=filters)))
@@ -109,7 +111,7 @@ def test_make_all():
     waited1 = [ressources.Lot(c) for _ in range(3)]
     waited1[0]._data = {"machin": "truc"}
     waited1[1]._data = {"machin": "bidule"}
-    waited1[2]._data = {"machin": "truc"}
+    waited1[2]._data = {"machin": "chouette"}
 
     waited2 = [ressources.Lot(c) for _ in range(2)]
     waited2[0]._data = {"machin": "truc"}
@@ -117,11 +119,9 @@ def test_make_all():
 
     def get(url, params):
         if params == fparams:  # has filter
-            v = responses2[params.get("page", 1) - 1]  # because page start at 1
+            return mock.Mock(status_code=200, json=lambda: responses2)
         else:
-            v = responses1[params.get("page", 1) - 1]
-
-        return mock.Mock(status_code=200, json=lambda: v)
+            return mock.Mock(status_code=200, json=lambda: responses1)
 
     with mock.patch('opv_api_client.restclient.requests.get', side_effect=get):
         a1 = c.make_all(ressources.Lot)
@@ -130,7 +130,6 @@ def test_make_all():
     assert a1 == waited1
     assert a2 == waited2
 
-@pytest.mark.xfail(strict=True)
 def test_make_all_fail():
     c = restclient.RestClient("")
 
