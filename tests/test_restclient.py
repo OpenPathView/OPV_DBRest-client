@@ -2,42 +2,38 @@ from unittest import mock
 import pytest
 import json
 
-from opv_api_client import restclient, ressources, RessourceEnum, Filter, APIException, RequestAPIException
+from opv_api_client import restclient, ressources, Filter
+from opv_api_client.exceptions import RequestAPIException
 from opv_api_client.filter import treat_query
 
 def test_gen_id():
-    assert restclient.RestClient("")._gen_id(2, 1) == "2-1"
+    assert restclient.RestClient("")._gen_id({"a": 2, "b":1}) == "2/1"
 
 def test_make_url():
 
     c = restclient.RestClient("localhost:5000")
-    assert c._makeUrl("v1", "test_res") == "localhost:5000/api/v1/test_res"
-    assert c._makeUrl("v1", "test_res", (2, 1)) == "localhost:5000/api/v1/test_res/2-1"
+    assert c._makeUrl("v1", "test_res") == "localhost:5000/v1/test_res"
+    assert c._makeUrl("v1", "test_res", {"a": 2, "b":1}) == "localhost:5000/v1/test_res/2/1"
 
     # Yeah a strange URL
     c = restclient.RestClient("localhost:5000", api_rel_url='/test/{ressource}/{version}', api_id_part="/id:{id}")
 
     assert c._makeUrl("v1", "test_res") == "localhost:5000/test/test_res/v1"
-    assert c._makeUrl("v1", "test_res", (2, 1)) == "localhost:5000/test/test_res/v1/id:2-1"
+    assert c._makeUrl("v1", "test_res", {"a": 2, "b":1}) == "localhost:5000/test/test_res/v1/id:2/1"
 
 def test_makeUrlFromRessource():
     c = restclient.RestClient("localhost:5000")
     ress = ressources.Lot(c)
-    assert c._makeUrlFromRessource(ress) == "localhost:5000/api/v1/lot"
+    assert c._makeUrlFromRessource(ress) == "localhost:5000/v1/lot"
 
 def test_make_success():
     c = restclient.RestClient("")
 
-    # Using the enumeration
-    ress = c.make(RessourceEnum.lot)
-    assert isinstance(ress, ressources.Lot)
-
-    # Using the class
     ress = c.make(ressources.Lot)
     assert isinstance(ress, ressources.Lot)
 
     with mock.patch.object(c, 'get') as mocked_get:
-        ress = c.make(RessourceEnum.lot, 2, 1)
+        ress = c.make(ressources.Lot, 2, 1)
 
     mocked_get.assert_called_once_with(ress)
 
@@ -62,7 +58,6 @@ def test_create():
     c = restclient.RestClient("")
     ress = ressources.Lot(c)
 
-
     m = mock.Mock(status_code=201, json=lambda: {})
 
     with mock.patch('opv_api_client.restclient.requests.post', return_value=m) as mocked_post:
@@ -85,7 +80,7 @@ def test_get_success():
     with mock.patch('opv_api_client.restclient.requests.get', return_value=r):
         assert r is c.get(ress)
 
-    assert ress._data == {"a": 1, 'id_lot': 2, 'id_malette': 1}
+    assert ress._data == {"a": 1}  # Will remplace and not update
 
 def test_get_fail():
     c = restclient.RestClient("")
@@ -97,7 +92,7 @@ def test_get_fail():
         with pytest.raises(RequestAPIException):
             c.get(ress)
 
-
+@pytest.mark.xfail(strict=True)
 def test_make_all():
     c = restclient.RestClient("")
 
@@ -130,11 +125,12 @@ def test_make_all():
 
     with mock.patch('opv_api_client.restclient.requests.get', side_effect=get):
         a1 = c.make_all(ressources.Lot)
-        a2 = c.make_all(RessourceEnum.lot, filters)
+        a2 = c.make_all(ressources.Lot, filters)
 
     assert a1 == waited1
     assert a2 == waited2
 
+@pytest.mark.xfail(strict=True)
 def test_make_all_fail():
     c = restclient.RestClient("")
 

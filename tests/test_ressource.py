@@ -9,4 +9,4 @@ def test_ressource():
     ress = ressources.Lot(c, (2, 1))
 
     assert ress._data == {"id_lot": 2, "id_malette": 1}
-    assert ress.id == (2, 1)
+    assert ress.id == {"id_lot": 2, "id_malette": 1}

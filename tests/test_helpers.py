@@ -3,7 +3,8 @@ import pytest
 from opv_api_client.helpers import PropertyAsDict
 
 def make_prop_as_dict():
-    p = PropertyAsDict({"test": "truc"})
+    p = PropertyAsDict()
+    p._data = {"test": "truc"}
     return p
 
 def test_property_as_dict():
