@@ -9,7 +9,6 @@ from inspect import isclass
 
 from opv_api_client.exceptions import RequestAPIException
 from opv_api_client.ressource import Ressource
-from opv_api_client.ressources import ressources
 from opv_api_client.filter import treat_query
 
 class RestClient:
@@ -18,7 +17,7 @@ class RestClient:
     This class make easy to connect to an API and to work with her.
     This class mainly allow you to get ressources (see `make`)
     """
-    def __init__(self, baseUrl, api_rel_url='/api/{version}/{ressource}', api_id_part='/{id}'):
+    def __init__(self, baseUrl, api_rel_url='/{version}/{ressource}', api_id_part='/{id}'):
         """ The initializer of :class RestClient:
 
         Args:
@@ -42,12 +41,8 @@ class RestClient:
             str: The final URL, that can be directly used.
         """
         id = ressource.id
-        try:
-            iter(id)
-        except TypeError:
-            id = None
         return self._makeUrl(ressource._api_version,
-                             ressource._name.value,
+                             ressource._name,
                              id)
 
     def _makeUrl(self, api_version, api_ressource, api_ressource_id=None):
@@ -74,7 +69,7 @@ class RestClient:
         url += self.api_rel_url.format(version=api_version, ressource=api_ressource)
 
         if api_ressource_id:
-            url += self.api_id_part.format(id=self._gen_id(*api_ressource_id))
+            url += self.api_id_part.format(id=self._gen_id(api_ressource_id))
         return url
 
     def save(self, ressource):
@@ -86,7 +81,8 @@ class RestClient:
             ressource(Ressource): the ressource to remove
         """
         url = self._makeUrlFromRessource(ressource)
-        j = self.__remove_empty_keys__(ressource._data)
+        data = ressource.dump_data()
+        j = self.__remove_empty_keys__(data)
         return requests.patch(url, json=j)
 
     def __remove_empty_keys__(self, dictionnary):
@@ -108,12 +104,13 @@ class RestClient:
             ressource(Ressource): the ressource to create
         """
         url = self._makeUrlFromRessource(ressource)
-        j = self.__remove_empty_keys__(ressource._data)
+        data = ressource.dump_data()
+        j = self.__remove_empty_keys__(data)
         r = requests.post(url, json=j)
         if r.status_code != 201:
             raise RequestAPIException("Can't create ressource", response=r)
 
-        ressource._data.update(r.json())
+        ressource.load_data(r.json())
 
         return r
 
@@ -146,22 +143,21 @@ class RestClient:
         r = requests.get(url)
 
         if r.status_code == 200:
-            ressource._data.update(r.json())
+            ressource.load_data(r.json())
             return r
         else:
             raise RequestAPIException("Can't get the ressource on the API", response=r)
 
-    def _gen_id(self, id, id_malette):
+    def _gen_id(self, ids):
         """An helper that generate an id from a composite id
 
         Params:
-            id: an id -> May be id_lot, id_sensors...
-            id_malette: The id of the malette
+            ids: an ordoned list of ids
 
         Returns:
-            str: id-id_malette
+            str: id1/id2/id3...
         """
-        return "{}-{}".format(id, id_malette)
+        return "/".join(str(v) for v in ids.values())
 
     def make(self, ressource, id_ress=None, id_malette=None):
         """Make a ressource
@@ -185,7 +181,7 @@ class RestClient:
         if isclass(ressource) and issubclass(ressource, Ressource):
             ressource_class = ressource
         else:
-            ressource_class = ressources[ressource]
+            ressource_class = ressource.get()
 
         # if already exist (aka id is set), get the existing ressource otherwise create a new one
         if id_malette and id_ress:
@@ -210,7 +206,7 @@ class RestClient:
         if isclass(ressource) and issubclass(ressource, Ressource):
             ressource_class = ressource
         else:
-            ressource_class = ressources[ressource]
+            ressource_class = ressource.get()
 
         # The url of the ressource
         url = self._makeUrlFromRessource(ressource_class)
@@ -238,7 +234,7 @@ class RestClient:
         for x in range(1, page_number + 1):  # for page in all_pages
             for data in page["objects"]:  # for ressource in page
                 ress = self.make(ressource_class)
-                ress._data = data
+                ress.load_data(data)
 
                 list_ress.append(ress)
 

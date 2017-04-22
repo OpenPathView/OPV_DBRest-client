@@ -1,4 +1,6 @@
 from opv_api_client.helpers import PropertyAsDict, MetaRessource
+from collections import OrderedDict
+
 
 __all__ = ['Ressource']
 
@@ -6,6 +8,9 @@ class Ressource(PropertyAsDict, metaclass=MetaRessource):
     _api_version = None
     _name = None
     _primary_keys = tuple()
+
+    class _rel:
+        """A class that allow to add relationships"""
 
     def __init__(self, rest_client, ids=None):
         """Warning, __init__ should be called at the very end of child's init - Won't works otherwise"""
@@ -23,9 +28,60 @@ class Ressource(PropertyAsDict, metaclass=MetaRessource):
     def id(self):
         """:obj: tuple or :obj: None: return the id of the ressource, if any"""
         try:
-            return tuple(self._data[primary_key] for primary_key in self._primary_keys)
+            return OrderedDict((primary_key, self._data[primary_key]) for primary_key in self._primary_keys)
         except KeyError:  # Don't have a full ID, probably not created
             return None
+
+    @classmethod
+    def from_id(cls, c, data):
+        ids = (data.get(i) for i in cls._primary_keys)
+        return cls(c, ids)
+
+    def load_data(self, data):
+        """Load data into the ressource
+        Args:
+            data: the data to treat
+
+        Returns:
+            the treated data
+        """
+
+        def convert(key, val):
+            """Convert data into a ressource -> foreign key"""
+            # have to be treated ?
+            try:
+                rel = getattr(self._rel, key)
+            except AttributeError:
+                return val
+
+            # -> have to be treated
+            if rel.many and isinstance(val, list):
+                return [rel.ressource_type.get().from_id(self._rest_client, ress_id) for ress_id in val]
+            else:
+                return rel.ressource_type.get().from_id(self._rest_client, val)
+
+        self._data = {k: convert(k, v) for k, v in data.items()}
+        return self._data
+
+    def dump_data(self):
+        """Dump ressource to an understable form for the API"""
+        def convert(key, val):
+            """Convert a ressource into an understable form -> foreign keys"""
+            # have to be treated ?
+            try:
+                rel = getattr(self._rel, key)
+            except AttributeError:
+                return val
+
+            # -> have to be treated
+            if rel.many and isinstance(val, list):
+                return [ress.id for ress in val]
+            else:
+                return val.id
+
+        data = {k: convert(k, v) for k, v in self._data.items()}
+
+        return data
 
     def __eq__(left, right):
         return left._data == right._data
