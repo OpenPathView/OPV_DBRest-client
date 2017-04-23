@@ -1,25 +1,26 @@
 from unittest import mock
 import pytest
 import json
+from collections import OrderedDict
 
 from opv_api_client import restclient, ressources, Filter
 from opv_api_client.exceptions import RequestAPIException
 from opv_api_client.filter import treat_query
 
 def test_gen_id():
-    assert restclient.RestClient("")._gen_id({"a": 2, "b":1}) == "2/1"
+    assert restclient.RestClient("")._gen_id(OrderedDict((("a", 2), ("b", 1)))) == "2/1"
 
 def test_make_url():
 
     c = restclient.RestClient("localhost:5000")
     assert c._makeUrl("v1", "test_res") == "localhost:5000/v1/test_res"
-    assert c._makeUrl("v1", "test_res", {"a": 2, "b":1}) == "localhost:5000/v1/test_res/2/1"
+    assert c._makeUrl("v1", "test_res", OrderedDict((("a", 2), ("b", 1)))) == "localhost:5000/v1/test_res/2/1"
 
     # Yeah a strange URL
     c = restclient.RestClient("localhost:5000", api_rel_url='/test/{ressource}/{version}', api_id_part="/id:{id}")
 
     assert c._makeUrl("v1", "test_res") == "localhost:5000/test/test_res/v1"
-    assert c._makeUrl("v1", "test_res", {"a": 2, "b":1}) == "localhost:5000/test/test_res/v1/id:2/1"
+    assert c._makeUrl("v1", "test_res", OrderedDict((("a", 2), ("b", 1)))) == "localhost:5000/test/test_res/v1/id:2/1"
 
 def test_makeUrlFromRessource():
     c = restclient.RestClient("localhost:5000")
