@@ -219,6 +219,8 @@ class RestClient:
         else:
             params = dict()
 
+        url += str(params.pop("_url", ""))
+
         r = requests.get(url, params=params)
         if r.status_code != 200:
             raise RequestAPIException("Can't get the list of ressources", response=r)

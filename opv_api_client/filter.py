@@ -7,6 +7,9 @@ class Filter:
     To set those values, you can respectively use the `name` and `val`/`value` fonction to set those
 
     """
+    _url_modifier = 0
+    _eq = 1
+
     def name(self, name):
         """Allow to set the name's field of the filter
 
@@ -37,11 +40,24 @@ class Filter:
 
         Allow to get the final filter, in a form that can directly be used by the API
         """
+        if self._type == self._url_modifier:
+            return {"_url": self._url}
+
         return {self._name: self._value}
+
+    @classmethod
+    def within(cls, ids, meters):
+        """Returns a filter that allow to integrate with ST_within"""
+        f = cls()
+
+        f._type = cls._url_modifier
+        f._url = "/" + "/".join(map(str, ids)) + "/within/" + str(meters)  # should use client._gen_id
+        return f
 
     def __init__(self, name=None):
         self._name = name
         self._value = None
+        self._type = self._eq
 
     __eq__ = value
 
