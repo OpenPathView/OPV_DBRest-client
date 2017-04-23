@@ -106,8 +106,8 @@ def test_make_all():
         [{"machin": "truc"}, {"machin": "truc"}]
     }
 
-    filters = treat_query(Filter("machin") == "truc")
-    fparams = dict(q=json.dumps(dict(filters=filters)))
+    filters = Filter("machin") == "truc"
+    fparams = treat_query(filters)
 
     waited1 = [ressources.Lot(c) for _ in range(3)]
     waited1[0]._data = {"machin": "truc"}

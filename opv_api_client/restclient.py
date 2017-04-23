@@ -215,8 +215,7 @@ class RestClient:
 
         # Create params that will be send
         if filters:
-            filters = treat_query(filters)  # Filter is now a list of dict as accepted by the API
-            params = dict(q=json.dumps(dict(filters=filters)))
+            params = treat_query(filters)  # Filter is now a list of dict as accepted by the API
         else:
             params = dict()
 
