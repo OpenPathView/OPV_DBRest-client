@@ -4,5 +4,6 @@ from opv_api_client.ressources.cp import Cp
 from opv_api_client.ressources.panorama import Panorama
 from opv_api_client.ressources.tile import Tile
 from opv_api_client.ressources.sensors import Sensors
+from opv_api_client.ressources.trackedge import TrackEdge
 
-__all__ = ["Lot", "Campaign", "Cp", "Panorama", "Tile", "Sensors"]
+__all__ = ["Lot", "Campaign", "Cp", "Panorama", "Tile", "Sensors", "TrackEdge"]
