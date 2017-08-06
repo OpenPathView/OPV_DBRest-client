@@ -12,3 +12,4 @@ class Lot(Ressource):
         campaign = Relationship(RessourceProxy("campaign"))
         cps = Relationship(RessourceProxy("cp"), many=True)
         sensors = Relationship(RessourceProxy("sensors"))
+        tile = Relationship(RessourceProxy("tile"))

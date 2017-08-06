@@ -71,6 +71,31 @@ class Ressource(PropertyAsDict, metaclass=MetaRessource):
         """
         self._lazy = False
 
+        def idsNotNone(idsDict):
+            """
+            Test ids value are not none.
+
+            :param idsDict: ids dict
+            :return: True if None value found in the dict.
+            """
+            for idLabel, idvalue in idsDict.items():
+                if idvalue is None:
+                    return False
+            return True
+
+        def getRessource(rel, idRessource):
+            """
+            Get a ressource if ids aren't None
+
+            :param rel: ressource subclass rel.
+            :param idRessource: dict of ids of the ressource.
+            :return: None if the ressources ids are None, the ressource instance if they aren't None.
+            """
+            if idsNotNone(idRessource):
+                return rel.ressource_type.get().from_id(self._rest_client, idRessource, lazy=True)
+            else:
+                return None
+
         def convert(key, val):
             """Convert data into a ressource -> foreign key"""
             # have to be treated ?
@@ -81,9 +106,9 @@ class Ressource(PropertyAsDict, metaclass=MetaRessource):
 
             # -> have to be treated
             if rel.many and isinstance(val, list):
-                return [rel.ressource_type.get().from_id(self._rest_client, ress_id, lazy=True) for ress_id in val]
+                return [getRessource(rel, ress_id) for ress_id in val]
             else:
-                return rel.ressource_type.get().from_id(self._rest_client, val, lazy=True)
+                return getRessource(rel, val)
 
         self._data = {k: convert(k, v) for k, v in data.items()}
         return self._data
