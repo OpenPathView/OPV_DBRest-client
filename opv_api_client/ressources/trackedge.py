@@ -9,5 +9,5 @@ class TrackEdge(Ressource):
     _primary_keys = ("id_track_edge", "id_malette")
 
     class _rel:
-        panorama_to = Relationship(RessourceProxy("panorama"))
-        panorama_from = Relationship(RessourceProxy("panorama"))
+        lot_to = Relationship(RessourceProxy("lot"))
+        lot_from = Relationship(RessourceProxy("lot"))
