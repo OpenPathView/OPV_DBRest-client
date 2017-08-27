@@ -16,6 +16,9 @@ class Ressource(PropertyAsDict, metaclass=MetaRessource):
     # Initializers
     ###
 
+    def __hash__(self):
+        return hash(frozenset(self.id.items()))
+
     def __init__(self, rest_client, ids=None, lazy=False):
         """Warning, __init__ should be called at the very end of child's init - Won't works otherwise
 

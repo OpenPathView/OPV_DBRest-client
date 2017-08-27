@@ -11,3 +11,4 @@ class Panorama(Ressource):
     class _rel:
         tiles = Relationship(RessourceProxy("tile"), many=True)
         cp = Relationship(RessourceProxy("cp"))
+        track_edges = Relationship(RessourceProxy('trackedge'), many=True)
