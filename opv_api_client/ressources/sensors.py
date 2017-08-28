@@ -7,4 +7,6 @@ class Sensors(Ressource):
     _api_version = "v1"
     _name = "sensors"
     _primary_keys = ("id_sensors", "id_malette")
-    lot = RessourceProxy("lot")
+
+    class _rel:
+        lot = Relationship(RessourceProxy("lot"))
