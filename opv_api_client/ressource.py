@@ -121,6 +121,9 @@ class Ressource(PropertyAsDict, metaclass=MetaRessource):
         def convert(key, val):
             """Convert a ressource into an understable form -> foreign keys"""
             # have to be treated ?
+            if val is None:
+                return None
+
             try:
                 rel = getattr(self._rel, key)
             except AttributeError:
