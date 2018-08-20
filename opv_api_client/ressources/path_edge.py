@@ -28,6 +28,6 @@ class PathEdge(Ressource):
     _primary_keys = ("id_path_edge", "id_malette")
 
     class _rel:
-        source = Relationship(RessourceProxy("path_node"))
-        dest = Relationship(RessourceProxy("path_node"))
+        source_path_node = Relationship(RessourceProxy("path_node"))
+        dest_path_node = Relationship(RessourceProxy("path_node"))
         path_details = Relationship(RessourceProxy("path_details"))
