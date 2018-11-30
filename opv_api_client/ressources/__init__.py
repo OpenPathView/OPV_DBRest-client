@@ -13,9 +13,12 @@ from opv_api_client.ressources.path_edge import PathEdge
 from opv_api_client.ressources.path_details import PathDetails
 from opv_api_client.ressources.panorama_sensors import PanoramaSensors
 from opv_api_client.ressources.path_node_extended import PathNodeExtended
+from opv_api_client.ressources.virtualtour import Virtualtour
+from opv_api_client.ressources.virtualtour_path import Virtualtour_path
 
 __all__ = [
     "Lot", "Campaign", "Cp", "Panorama", "Tile", "Sensors", "TrackEdge", "Reconstruction", "Shot", "Path", "PathNode",
     "PathEdge", "PathDetails",
-    "PanoramaSensors", "PathNodeExtended"
+    "PanoramaSensors", "PathNodeExtended",
+    "Virtualtour", "Virtualtour_path"
 ]
